@@ -1,0 +1,126 @@
+-- ============================================
+-- 8 QUERY SELECT - Database Universitario
+-- ============================================
+
+USE `db_university`;
+
+-- ========================================
+-- QUERY 1: Studenti nati nel 1990
+-- ========================================
+SELECT 
+  s.id,
+  s.registration_number,
+  CONCAT(s.name, ' ', s.surname) AS nome_completo,
+  s.date_of_birth,
+  s.email
+FROM students s
+WHERE YEAR(s.date_of_birth) = 1990
+ORDER BY s.date_of_birth ASC;
+
+
+-- ========================================
+-- QUERY 2: Corsi che valgono più di 10 crediti
+-- ========================================
+SELECT 
+  c.id,
+  c.name AS nome_corso,
+  c.cfu,
+  c.year AS anno,
+  c.period AS semestre,
+  c.description
+FROM courses c
+WHERE c.cfu > 10
+ORDER BY c.cfu DESC, c.name ASC;
+
+
+-- ========================================
+-- QUERY 3: Studenti che hanno più di 30 anni
+-- ========================================
+SELECT 
+  s.id,
+  s.registration_number,
+  CONCAT(s.name, ' ', s.surname) AS nome_completo,
+  s.date_of_birth,
+  YEAR(CURDATE()) - YEAR(s.date_of_birth) AS eta,
+  s.email
+FROM students s
+WHERE (YEAR(CURDATE()) - YEAR(s.date_of_birth)) > 30
+  OR (YEAR(CURDATE()) - YEAR(s.date_of_birth) = 30 AND DATE_FORMAT(s.date_of_birth, '%m-%d') < DATE_FORMAT(CURDATE(), '%m-%d'))
+ORDER BY s.date_of_birth ASC;
+
+
+-- ========================================
+-- QUERY 4: Corsi primo semestre primo anno
+-- ========================================
+SELECT 
+  c.id,
+  c.name AS nome_corso,
+  c.year AS anno_studio,
+  c.period AS semestre,
+  c.cfu,
+  c.description
+FROM courses c
+WHERE c.year = 1 
+  AND c.period = 'I semestre'
+ORDER BY c.name ASC;
+
+
+-- ========================================
+-- QUERY 5: Appelli pomeriggio (dopo 14:00) del 20/06/2020
+-- ========================================
+SELECT 
+  e.id AS id_appello,
+  e.date AS data_appello,
+  e.hour AS ora_appello,
+  c.name AS nome_corso,
+  e.location AS luogo,
+  e.address AS indirizzo
+FROM exams e
+INNER JOIN courses c ON e.course_id = c.id
+WHERE DATE(e.date) = '2020-06-20'
+  AND HOUR(e.hour) >= 14
+ORDER BY e.hour ASC;
+
+
+-- ========================================
+-- QUERY 6: Corsi di laurea magistrale (LM)
+-- ========================================
+SELECT 
+  d.id AS id_corso,
+  d.name AS nome_corso_laurea,
+  d.level AS livello,
+  d.duration_years AS durata_anni,
+  dep.name AS dipartimento
+FROM degrees d
+LEFT JOIN departments dep ON d.department_id = dep.id
+WHERE d.level = 'LM'
+ORDER BY d.name ASC;
+
+
+-- ========================================
+-- QUERY 7: Numero totale di dipartimenti
+-- ========================================
+SELECT 
+  COUNT(*) AS numero_dipartimenti,
+  GROUP_CONCAT(name SEPARATOR ', ') AS elenco_dipartimenti
+FROM departments;
+
+
+-- ========================================
+-- QUERY 8: Insegnanti senza numero di telefono
+-- ========================================
+SELECT 
+  t.id,
+  CONCAT(t.name, ' ', t.surname) AS nome_docente,
+  t.email,
+  t.office_address,
+  t.office_number
+FROM teachers t
+WHERE t.phone IS NULL 
+  OR t.phone = ''
+  OR t.phone = 'NULL'
+ORDER BY t.name, t.surname ASC;
+
+-- ============================================
+-- ✅ TUTTE LE QUERY COMPLETATE!
+-- ============================================
