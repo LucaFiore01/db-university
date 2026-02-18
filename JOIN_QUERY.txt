@@ -1,0 +1,140 @@
+-- ============================================
+-- 7 QUERY CON JOIN - Database Universitario
+-- ============================================
+
+USE `db_university`;
+
+-- ========================================
+-- QUERY 1: Studenti iscritti a Economia
+-- ========================================
+SELECT 
+  s.id,
+  s.registration_number,
+  CONCAT(s.name, ' ', s.surname) AS nome_completo,
+  s.date_of_birth,
+  s.enrolment_date,
+  s.email,
+  d.name AS corso_laurea
+FROM students s
+INNER JOIN degrees d ON s.degree_id = d.id
+WHERE d.name LIKE '%Economia%'
+ORDER BY s.surname, s.name ASC;
+
+
+-- ========================================
+-- QUERY 2: Corsi Magistrale del Dipartimento Neuroscienze
+-- ========================================
+SELECT 
+  d.id AS id_corso,
+  d.name AS nome_corso_magistrale,
+  d.level AS livello,
+  d.duration_years AS durata_anni,
+  dep.name AS dipartimento,
+  dep.address AS indirizzo_dipartimento
+FROM degrees d
+INNER JOIN departments dep ON d.department_id = dep.id
+WHERE d.level = 'LM' 
+  AND dep.name LIKE '%Neuroscienze%'
+ORDER BY d.name ASC;
+
+
+-- ========================================
+-- QUERY 3: Corsi insegnati da Fulvio Amato (id=44)
+-- ========================================
+SELECT 
+  c.id AS id_corso,
+  c.name AS nome_corso,
+  c.cfu,
+  c.year AS anno,
+  c.period AS semestre,
+  d.name AS corso_laurea,
+  CONCAT(t.name, ' ', t.surname) AS insegnante
+FROM courses c
+INNER JOIN course_teacher ct ON c.id = ct.course_id
+INNER JOIN teachers t ON ct.teacher_id = t.id
+INNER JOIN degrees d ON c.degree_id = d.id
+WHERE t.id = 44
+ORDER BY c.name ASC;
+
+
+-- ========================================
+-- QUERY 4: Studenti con corso laurea e dipartimento
+-- ========================================
+SELECT 
+  s.id AS id_studente,
+  s.registration_number,
+  CONCAT(s.name, ' ', s.surname) AS nome_completo,
+  s.date_of_birth,
+  s.email,
+  d.name AS corso_laurea,
+  d.level AS livello_corso,
+  dep.name AS dipartimento
+FROM students s
+INNER JOIN degrees d ON s.degree_id = d.id
+INNER JOIN departments dep ON d.department_id = dep.id
+ORDER BY s.surname ASC, s.name ASC;
+
+
+-- ========================================
+-- QUERY 5: Corsi di laurea con corsi e insegnanti
+-- ========================================
+SELECT 
+  d.id AS id_corso_laurea,
+  d.name AS corso_laurea,
+  c.id AS id_corso,
+  c.name AS nome_corso,
+  c.cfu,
+  c.year AS anno,
+  CONCAT(t.name, ' ', t.surname) AS insegnante,
+  t.email AS email_insegnante
+FROM degrees d
+LEFT JOIN courses c ON d.id = c.degree_id
+LEFT JOIN course_teacher ct ON c.id = ct.course_id
+LEFT JOIN teachers t ON ct.teacher_id = t.id
+ORDER BY d.name ASC, c.year ASC, c.name ASC, t.surname ASC;
+
+
+-- ========================================
+-- QUERY 6: Docenti che insegnano nel Dipartimento Matematica
+-- ========================================
+SELECT DISTINCT
+  t.id AS id_docente,
+  CONCAT(t.name, ' ', t.surname) AS nome_docente,
+  t.email,
+  t.phone,
+  t.office_address,
+  t.office_number,
+  dep.name AS dipartimento
+FROM teachers t
+INNER JOIN course_teacher ct ON t.id = ct.teacher_id
+INNER JOIN courses c ON ct.course_id = c.id
+INNER JOIN degrees d ON c.degree_id = d.id
+INNER JOIN departments dep ON d.department_id = dep.id
+WHERE dep.name LIKE '%Matematica%'
+ORDER BY t.surname ASC, t.name ASC;
+
+
+-- ========================================
+-- QUERY 7 BONUS: Tentativi per esame con voto massimo
+-- ========================================
+SELECT 
+  s.id AS id_studente,
+  CONCAT(s.name, ' ', s.surname) AS nome_studente,
+  c.id AS id_corso,
+  c.name AS nome_corso,
+  e.id AS id_appello,
+  e.date AS data_appello,
+  COUNT(es.vote) AS numero_tentativi,
+  MAX(es.vote) AS voto_massimo,
+  MIN(es.vote) AS voto_minimo
+FROM students s
+INNER JOIN exam_student es ON s.id = es.student_id
+INNER JOIN exams e ON es.exam_id = e.id
+INNER JOIN courses c ON e.course_id = c.id
+WHERE es.vote >= 18
+GROUP BY s.id, s.name, s.surname, c.id, c.name, e.id, e.date
+ORDER BY s.surname ASC, s.name ASC, c.name ASC, e.date DESC;
+
+-- ============================================
+-- ✅ TUTTE LE QUERY CON JOIN COMPLETATE!
+-- ============================================
