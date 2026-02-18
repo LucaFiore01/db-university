@@ -1,0 +1,68 @@
+-- ============================================
+-- 4 QUERY GROUP BY - Database Universitario
+-- ============================================
+
+USE `db_university`;
+
+-- ========================================
+-- QUERY 1: Contare iscritti per anno
+-- ========================================
+SELECT 
+  YEAR(s.enrolment_date) AS anno_iscrizione,
+  COUNT(*) AS numero_iscritti
+FROM students s
+WHERE s.enrolment_date IS NOT NULL
+GROUP BY YEAR(s.enrolment_date)
+ORDER BY anno_iscrizione DESC;
+
+
+-- ========================================
+-- QUERY 2: Contare insegnanti per ufficio
+-- ========================================
+SELECT 
+  CONCAT(t.office_address, ' - Ufficio ', t.office_number) AS ufficio,
+  COUNT(*) AS numero_insegnanti,
+  GROUP_CONCAT(CONCAT(t.name, ' ', t.surname) SEPARATOR ', ') AS insegnanti
+FROM teachers t
+WHERE t.office_address IS NOT NULL AND t.office_address != ''
+GROUP BY t.office_address, t.office_number
+ORDER BY numero_insegnanti DESC;
+
+
+-- ========================================
+-- QUERY 3: Media voti per appello d'esame
+-- ========================================
+SELECT 
+  e.id AS id_appello,
+  e.date AS data_appello,
+  e.hour AS ora_appello,
+  c.name AS nome_corso,
+  COUNT(es.student_id) AS numero_studenti_iscritti,
+  COUNT(CASE WHEN es.vote IS NOT NULL THEN 1 END) AS numero_studenti_valutati,
+  ROUND(AVG(es.vote), 2) AS media_voti,
+  MIN(es.vote) AS voto_minimo,
+  MAX(es.vote) AS voto_massimo
+FROM exams e
+INNER JOIN courses c ON e.course_id = c.id
+LEFT JOIN exam_student es ON e.id = es.exam_id
+GROUP BY e.id, e.date, e.hour, c.name
+ORDER BY e.date DESC, e.hour DESC;
+
+
+-- ========================================
+-- QUERY 4: Corsi di laurea per dipartimento
+-- ========================================
+SELECT 
+  d.id AS id_dipartimento,
+  d.name AS nome_dipartimento,
+  d.address AS indirizzo,
+  COUNT(deg.id) AS numero_corsi_laurea,
+  GROUP_CONCAT(deg.name SEPARATOR ' | ') AS corsi_offertidi
+FROM departments d
+LEFT JOIN degrees deg ON d.id = deg.department_id
+GROUP BY d.id, d.name, d.address
+ORDER BY numero_corsi_laurea DESC, d.name ASC;
+
+-- ============================================
+-- ✅ QUERY COMPLETATE!
+-- ============================================
